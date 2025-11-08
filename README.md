@@ -1,31 +1,88 @@
-[![Build Status](https://travis-ci.org/microservices-demo/microservices-demo.svg?branch=master)](https://travis-ci.org/microservices-demo/microservices-demo)
+# Reto 4 – Opción 2: Despliegue de Microservicios en Amazon EKS
 
-# DEPRECATED: Sock Shop : A Microservice Demo Application
+## Descripción general
+En este trabajo se implementó la aplicación Sock Shop, una arquitectura basada en microservicios, desplegada sobre un clúster Amazon EKS (Elastic Kubernetes Service) con nodos EC2 en la región us-east-1.  
+El objetivo fue demostrar la capacidad de desplegar, administrar y exponer una aplicación distribuida en Kubernetes dentro de AWS.
 
-The application is the user-facing part of an online shop that sells socks. It is intended to aid the demonstration and testing of microservice and cloud native technologies.
+## Justificación de la elección de la aplicación
+La aplicación Sock Shop fue seleccionada porque es una aplicación de referencia ampliamente utilizada para demostrar arquitecturas de microservicios y despliegues en entornos de Kubernetes y nubes públicas como Amazon EKS.  
 
-It is built using [Spring Boot](http://projects.spring.io/spring-boot/), [Go kit](http://gokit.io) and [Node.js](https://nodejs.org/) and is packaged in Docker containers.
+Sock Shop fue desarrollada por Weaveworks y Container Solutions con el propósito de servir como un ejemplo educativo y práctico de cómo estructurar, desplegar y escalar sistemas distribuidos en contenedores.  
+La aplicación simula una tienda en línea con funcionalidades reales, como catálogo de productos, autenticación de usuarios, carrito de compras, pedidos y procesamiento de pagos. Cada una de estas funcionalidades está implementada como un microservicio independiente.
 
-You can read more about the [application design](./internal-docs/design.md).
+Esta aplicación resulta ideal para el proyecto porque permite:
+- Analizar la comunicación entre servicios mediante APIs internas.
+- Comprobar el funcionamiento del balanceo de carga, la escalabilidad y la tolerancia a fallos en Kubernetes.
+- Visualizar cómo Kubernetes gestiona pods, servicios, réplicas y Load Balancers.
+- Practicar la automatización del despliegue en un entorno realista, similar a sistemas empresariales.
 
-## Deployment Platforms
+Por estas razones, Sock Shop constituye un caso de estudio adecuado para demostrar el despliegue de microservicios en la nube utilizando las herramientas de AWS (EKS, EC2 y ELB), validando conceptos de orquestación, resiliencia y administración de infraestructura basada en contenedores.
 
-The [deploy folder](./deploy/) contains scripts and instructions to provision the application onto your favourite platform. 
+---
 
-Please let us know if there is a platform that you would like to see supported.
+## Pasos realizados
 
-## Bugs, Feature Requests and Contributing
+### 1. Creación del clúster EKS
+- Se creó el clúster bookstore-cluster en la consola de AWS EKS.
+- Se seleccionó la configuración rápida con el modo automático habilitado.
+- Se asignaron subredes públicas y el rol IAM correspondiente.
 
-We'd love to see community contributions. We like to keep it simple and use Github issues to track bugs and feature requests and pull requests to manage contributions. See the [contribution information](.github/CONTRIBUTING.md) for more information.
+### 2. Creación del grupo de nodos (EC2)
+- Se configuró el grupo de nodos bookstore-nodes.
+- Tipo de instancia: t3.medium
+- Tamaño de disco: 20 GiB
+- Tamaño deseado: 2 nodos
+- Clave de acceso: eks-keypair
+- Se configuraron grupos de seguridad para permitir acceso SSH y HTTP.
 
-## Screenshot
+### 3. Configuración local
+- Instalación y configuración de AWS CLI:
+  ```bash
+  aws configure
 
-![Sock Shop frontend](https://github.com/microservices-demo/microservices-demo.github.io/raw/master/assets/sockshop-frontend.png)
 
-## Visualizing the application
+Se ingresaron las credenciales del laboratorio y la región us-east-1.
 
-Use [Weave Scope](http://weave.works/products/weave-scope/) or [Weave Cloud](http://cloud.weave.works/) to visualize the application once it's running in the selected [target platform](./deploy/).
+Conexión con el clúster:
 
-![Sock Shop in Weave Scope](https://github.com/microservices-demo/microservices-demo.github.io/raw/master/assets/sockshop-scope.png)
+aws eks update-kubeconfig --region us-east-1 --name bookstore-cluster
 
-## 
+4. Despliegue de la aplicación Sock Shop
+
+Se aplicaron los manifiestos de Kubernetes desde la carpeta del proyecto:
+
+kubectl apply -f complete-demo.yaml
+
+5. Verificación del despliegue
+
+Se verificaron los pods y servicios:
+
+kubectl get pods -n sock-shop
+kubectl get svc -n sock-shop
+
+6. Exposición del frontend mediante LoadBalancer
+
+Inicialmente, el servicio front-end estaba configurado como NodePort.
+
+Se editó para exponerlo públicamente:
+
+kubectl edit svc front-end -n sock-shop
+
+
+Se cambió:
+
+type: NodePort
+
+
+por:
+
+type: LoadBalancer
+
+7. Acceso a la aplicación
+
+AWS generó automáticamente un Elastic Load Balancer (ELB) con el siguiente dominio público:
+
+http://a8f516e41a68744099fd775f94b74956-261273995.us-east-1.elb.amazonaws.com
+
+
+Desde este dominio se pudo acceder a la aplicación Sock Shop de manera pública."# microservicios" 
