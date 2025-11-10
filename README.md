@@ -1,6 +1,6 @@
 # Reto 4 – Opción 2: Despliegue de Microservicios en Amazon EKS
 
-**Estudiante:** Sara Pineda – spinedal@eafit.edu.co  
+**Estudiante:** Sara Pineda, Juan Diego Robles, Santiago Betancur
 **Profesor:** Alvaro Enrique Ospina 
 
 ---
